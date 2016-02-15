@@ -15,11 +15,11 @@
 #'   http://www.scb.se/Grupp/OmSCB/API/API-description.pdf
 #' 
 #' @examples
-#'  pxwebapi$new(api_url = "http://api.scb.se/OV0104/v1/doris/sv/")
-#'  pxwebapi$new(api_url = "http://api.scb.se/OV0104/v1/doris/sv/ssd/")
-#'  pxwebapi$new(api_url = "http://api.scb.se/OV0104/v1/doris/sv/ssd/PR/PR0101/PR0101E/Basbeloppet")
-#'  try(pxwebapi$new(api_url = "http://www.dn.se"))
-#'  
+#'   pxwebapi$new(api_url = "http://api.scb.se/OV0104/v1/doris/sv/")
+#'   pxwebapi$new(api_url = "http://api.scb.se/OV0104/v1/doris/sv/ssd/")
+#'   pxwebapi$new(api_url = "http://api.scb.se/OV0104/v1/doris/sv/ssd/PR/PR0101/PR0101E/Basbeloppet")
+#'   try(pxwebapi$new(api_url = "http://www.dn.se"))
+#'   
 #' @export pxwebapi
 
 pxwebapi <- 
