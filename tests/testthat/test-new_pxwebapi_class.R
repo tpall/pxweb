@@ -26,3 +26,19 @@ test_that(desc="pxwebapi_class examples work",{
 
 })
 
+test_that(desc="pxwebapi_class input tests",{  
+  
+  expect_that({
+    test_api <- 
+      pxwebapi$new(api_url = 1)
+  }, throws_error())
+  
+  expect_that({
+    test_api <- 
+      pxwebapi$new(api_url = c("http://api.scb.se/OV0104/v1/doris/sv/ssd/",
+                               "http://api.scb.se/OV0104/v1/doris/sv/ssd/PR/PR0101/PR0101E/Basbeloppet"))
+  }, throws_error())
+
+})
+
+
