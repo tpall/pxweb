@@ -16,15 +16,15 @@ pxweb_query <-
     fields = list(query = "data.frame"),
     
     methods = list(
-      check_query = function(pxweb_api){
+      check_query = function(pxwebapi_obj){
         'Check that the call is consistent with a pxweb table url'
         
       },
 
-      initialize = function(query, pxwebapi){
+      initialize = function(query, pxwebapi_obj){
         'Create a new pxwebapi_query'
         .self$parse_query(query)        
-        .self$check_pxweb_query(pxwebapi)
+        .self$check_pxweb_query(pxwebapi_obj)
       },
 
       parse_query = function(query){
@@ -67,20 +67,55 @@ pxweb_query <-
         stop("Not a correct pxweb query.")
       },
       
-      check_pxweb_query = function(pxwebapi){
-        if(!inherits(pxwebapi, "pxwebapi")) stop("Not a pxweb api!")
-        cat("Check check")
+      check_pxweb_query = function(pxwebapi_obj){
+        if(!inherits(pxwebapi_obj, "pxwebapi")) stop("Not a pxweb api object!")
+        
+        dim_names_api <- unlist(lapply(X = pxwebapi_obj$get_metadata()$variables, FUN=function(X) X$code))
+        
+        # ContentCode is missing (common with json queries)
+        if(length(dim_names_api) - 1 == length(.self$query$code) && 
+          dim_names_api[!dim_names_api %in% .self$query$code] == "ContentsCode"){
+          # Add ContentCode
+          ccindex <- which(!dim_names_api %in% .self$query$code)
+          q <- .self$query
+          cc <- q[1,]
+          row.names(cc) <- row.names(cc$selection) <- nrow(q) + 1
+          cc$code <- "ContentsCode"
+          cc$selection$filter <- "all"
+          cc$selection$values <- "*"
+          q <- rbind.data.frame(q, cc)
+          .self$query <- q
+        } 
+        
+        if(all(dim_names_api %in% .self$query$code) && 
+           all(.self$query$code %in% dim_names_api) &&
+           any(.self$query$code != dim_names_api)){
+          # Reorder query
+          q <- .self$query
+          rownames(q) <- .self$query$code
+          q <- q[dim_names_api,]
+          rownames(q) <- NULL
+          .self$query <- q 
+        }
+        
+        if(all(dim_names_api %in% .self$query$code) && 
+           all(.self$query$code %in% dim_names_api) &&
+           all(.self$query$code == dim_names_api)){
+          # Query OK 
+        } else {
+          stop("Not a correct query!")
+        }
       },
       
-      get_query = function(){
-        'Get data from content.'
-        jsonlite::toJSON(list(query=.self$query, response=list(format="json")))
+      get_query = function(pretty = FALSE){
+        'Get query in json format.'
+        jsonlite::toJSON(list(query=query, response=list(format="json")), pretty = pretty)
       },
       
       show = function(){
         'Print the pxwebapi object.'
         cat("Query:\n")
-        print(.self$get_query())
+        print(.self$get_query(TRUE))
       }
     )
 )        
