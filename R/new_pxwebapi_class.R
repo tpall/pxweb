@@ -1,4 +1,4 @@
-#' A Reference Class to represent an pxweb api connection 
+#' A Reference Class to represent a pxweb api connection 
 #' 
 #' @field api_name The name of the api (api domain)
 #' @field url The URL to the api
@@ -133,11 +133,7 @@ pxwebapi <-
           if(length(api_timer[[.self$api_name]]) >= .self$api_limits$max_calls){
             diff <- as.numeric(api_timer[[.self$api_name]][1] - api_timer[[.self$api_name]][length(api_timer[[.self$api_name]])], units="secs")
             Sys.sleep(time=max(.self$api_limits$time_window - diff,0))
-#            print(api_timer[[.self$api_name]])
-#            print(as.numeric(Sys.time() - api_timer[[.self$api_name]], units="secs") < .self$api_limits$time_window)
-#            print(length(api_timer[[.self$api_name]]))
             api_timer[[.self$api_name]] <- api_timer[[.self$api_name]][as.numeric(Sys.time() - api_timer[[.self$api_name]], units="secs") < .self$api_limits$time_window]
-#            print(length(api_timer[[.self$api_name]]))
           }
           save(api_timer, file=.self$api_timer_file)
         }
