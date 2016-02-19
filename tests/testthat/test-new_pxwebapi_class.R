@@ -41,4 +41,16 @@ test_that(desc="pxwebapi_class input tests",{
 
 })
 
+test_that(desc="pxwebapi_class get data",{  
 
+  pxwebapi_obj <- pxwebapi$new("http://api.scb.se/OV0104/v1/doris/sv/ssd/PR/PR0101/PR0101E/Basbeloppet")
+  query <- pxweb_query$new(list(ContentsCode = c('PR0101A1'),Tid = c('*')), pxwebapi_obj)
+  
+  expect_that({
+    test_data <- 
+      pxwebapi_obj$get_data(query)
+  }, not(throws_error()))
+
+  expect_is(test_data, "list")
+  
+})

@@ -16,10 +16,6 @@ pxweb_query <-
     fields = list(query = "data.frame"),
     
     methods = list(
-      check_query = function(pxwebapi_obj){
-        'Check that the call is consistent with a pxweb table url'
-        
-      },
 
       initialize = function(query, pxwebapi_obj){
         'Create a new pxwebapi_query'
@@ -109,7 +105,7 @@ pxweb_query <-
       
       get_query = function(pretty = FALSE){
         'Get query in json format.'
-        jsonlite::toJSON(list(query=query, response=list(format="json")), pretty = pretty)
+        jsonlite::toJSON(list(query=.self$query, response=list(format=jsonlite::unbox("json"))), pretty = pretty)
       },
       
       show = function(){

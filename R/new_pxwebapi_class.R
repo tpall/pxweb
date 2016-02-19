@@ -89,11 +89,38 @@ pxwebapi <-
         .self$meta_data
       },
       
-      get_data = function(content){
+      get_data = function(query){
         'Get the api configuration from the api.'
-        NULL
+        if(!inherits(query, "pxweb_query")) stop("Not a pxweb query!")
+        
+        .self$add_call_to_timer()
+        response <- try(httr::POST(
+          url=.self$url,
+          body = query$get_query(FALSE),
+          httr::content_type_json()), silent=TRUE)
+        
+        if (class(response)=="try-error") stop(paste0("No internet connection to ",.self$url), call.=FALSE)
+
+        httr::stop_for_status(response)
+
+        .self$clean_and_parse_json_data(json_data = suppressWarnings(httr::content(response)))
+
       },
       
+      clean_and_parse_json_data = function(json_data){
+        df <- data.frame(matrix(unlist(json_data$data), ncol=length(json_data$columns), byrow = TRUE), stringsAsFactors = FALSE)
+        for(j in seq_along(json_data$columns)){
+          if(json_data$columns[[j]]$type == "c") df[,j] <- as.numeric(df[,j])
+        }
+        colnames(df) <- unlist(lapply(json_data$columns, FUN = function(X) X$code))
+        res <- list(data=df,
+                    metadata=json_data$columns,
+                    comments=json_data$comments)
+
+        res
+      },
+        
+
       add_call_to_timer = function(calls = 1){
         'Add a call to the api to the api timer.'
         if(!file.exists(.self$api_timer_file)){ # File doesn't exist
