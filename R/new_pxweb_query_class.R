@@ -13,7 +13,8 @@
 pxweb_query <- 
   setRefClass(
     Class = "pxweb_query", 
-    fields = list(query = "data.frame"),
+    fields = list(query = "data.frame",
+                  query_dimensions = "numeric"),
     
     methods = list(
 
@@ -21,6 +22,7 @@ pxweb_query <-
         'Create a new pxwebapi_query'
         .self$parse_query(query)        
         .self$check_pxweb_query(pxwebapi_obj)
+        .self$set_query_dimensions(pxwebapi_obj)
       },
 
       parse_query = function(query){
@@ -108,10 +110,33 @@ pxweb_query <-
         jsonlite::toJSON(list(query=.self$query, response=list(format=jsonlite::unbox("json"))), pretty = pretty)
       },
       
+      set_query_dimensions = function(pxwebapi_obj){
+        'Get the size of the query.'
+        q_dims <- integer(length(.self$query$code))
+        names(q_dims) <- .self$query$code
+        
+        for(i in seq_along(.self$query$code)){
+          if(.self$query$selection$filter[i] == "item"){
+            q_dims[i] <- length(.self$query$selection$values[[i]])
+          } else if(.self$query$selection$filter[i] == "all") {
+            pxwebapi_obj$meta_data
+            q_dims[i] <- length(pxwebapi_obj$meta_data$variables[[i]]$values)
+          }
+        }
+        .self$query_dimensions <- q_dims
+      },
+      
+      get_query_dimensions = function(){
+        'Get the size of the query.'
+        .self$query_dimensions
+      },
+      
       show = function(){
         'Print the pxwebapi object.'
-        cat("Query:\n")
+        cat("PXWEB query:\n")
         print(.self$get_query(TRUE))
+        cat("\nQuery dimensions:\n")
+        print(.self$get_query_dimensions())
       }
     )
 )        
