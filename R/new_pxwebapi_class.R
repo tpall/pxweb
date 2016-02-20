@@ -93,7 +93,12 @@ pxwebapi <-
         'Get data from content.'
         if(!inherits(query, "pxweb_query")) stop("Not a pxweb query!")
 
-        .self$get_data_batch(query)
+        query_list <- .self$create_query_batches(query)
+        result_list <- list()
+        for(q in seq_along(query_list)){
+          result_list <- .self$get_data_batch(query_list[q])
+        }
+        result_list
       },
       
       get_data_batch = function(query){
