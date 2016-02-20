@@ -90,8 +90,14 @@ pxwebapi <-
       },
       
       get_data = function(query){
-        'Get the api configuration from the api.'
+        'Get data from content.'
         if(!inherits(query, "pxweb_query")) stop("Not a pxweb query!")
+
+        .self$get_data_batch(query)
+      },
+      
+      get_data_batch = function(query){
+        'Get the api configuration from the api.'
         
         .self$add_call_to_timer()
         response <- try(httr::POST(
@@ -159,11 +165,6 @@ pxwebapi <-
         .self$fetch_metadata()
         .self$set_url_type()
         
-      },
-      
-      get_data = function(content){
-        'Get data from content.'
-        cat("get_data")
       },
       
       show = function(){
