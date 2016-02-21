@@ -96,13 +96,19 @@ pxwebapi <-
         query_list <- .self$create_query_batches(query)
         result_list <- list()
         for(q in seq_along(query_list)){
-          result_list <- .self$get_data_batch(query_list[q])
+          tmp_result <- .self$get_data_batch(query_list[q])
+          if(q==1){
+            result <- tmp_result
+          } else {
+            result$data <- rbind(result$data, tmp_result$data)
+            result$comments <- c(result$comments, tmp_result$comments)
+          }
         }
-        result_list
+        result
       },
       
       get_data_batch = function(query){
-        'Get the api configuration from the api.'
+        'Get a batch of data from a pxweb api.'
         
         .self$add_call_to_timer()
         response <- try(httr::POST(
@@ -118,7 +124,13 @@ pxwebapi <-
 
       },
       
+      create_query_batches = function(query){
+        'Split up a query into batches.'
+        query
+      },
+      
       clean_and_parse_json_data = function(json_data){
+        
         df <- data.frame(matrix(unlist(json_data$data), ncol=length(json_data$columns), byrow = TRUE), stringsAsFactors = FALSE)
         for(j in seq_along(json_data$columns)){
           if(json_data$columns[[j]]$type == "c") df[,j] <- as.numeric(df[,j])
