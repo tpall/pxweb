@@ -94,9 +94,16 @@ pxwebapi <-
         if(!inherits(query, "pxweb_query")) stop("Not a pxweb query!")
 
         query_list <- .self$create_query_batches(query)
+        big_query <- length(query_list) > 1
+        if(big_query) {
+          message("This is a big query. Downloading in ", length(query_list), " batches:\n")
+          prgs_bar <- msg_progress_bar(length(query_list))
+        }
+        
         result_list <- list()
         for(q in seq_along(query_list)){
           tmp_result <- .self$get_data_batch(query_list[q])
+          if(big_query) prgs_bar$increment()
           if(q==1){
             result <- tmp_result
           } else {
@@ -126,6 +133,7 @@ pxwebapi <-
       
       create_query_batches = function(query){
         'Split up a query into batches.'
+        
         query
       },
       

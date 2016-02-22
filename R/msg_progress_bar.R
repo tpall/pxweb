@@ -11,10 +11,10 @@
 #' @field progress_step Addition to progress per iteration
 #' 
 #' @examples
-#' test_bar <- function(i = 10){
-#'  bar <- msgProgressBar(i)
-#'  for(j in 1:i){
-#'    bar$iterate()
+#'  test_bar <- function(iter = 10){
+#'  bar <- msg_progress_bar(iter)
+#'  for(j in 1:iter){
+#'    bar$increment()
 #'    Sys.sleep(0.01)
 #'    }
 #'  }
