@@ -5,6 +5,10 @@
 #   https://github.com/craigcitro/r-travis/wiki
 
 language: r
+r:
+  - oldrel
+  - release
+  - devel
 sudo: required
 
 # Be strict when checking our package
