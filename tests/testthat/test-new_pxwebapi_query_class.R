@@ -120,9 +120,12 @@ test_that(desc="pxwebapi_query change query",{
   pxweb_q_api <- pxweb_query$new(api = example_url, query = example_query)
 
   expect_true(length(pxweb_q_api$query$selection$values[[2]]) == 1)
-
+  expect_true(pxweb_q_api$get_query_selection_values("Tid") == "*")
+  
   pxweb_q_api$expand_query_selection_values(code = "Tid")
   
   expect_true(length(pxweb_q_api$query$selection$values[[2]]) == 57)
-  
+  expect_true(length(pxweb_q_api$get_query_selection_values("Tid")) == 57)
 })
+
+

@@ -151,6 +151,13 @@ pxweb_query <-
         cat("\nQuery dimensions:\n")
         print(.self$get_query_dimensions())
       
+      get_query_selection_values = function(code){
+        'Set selection.filter with all values.'
+        stopifnot(code %in% .self$query$code)
+        index <- which(.self$query$code %in% code)
+        .self$query$selection$values[[index]]
+      },
+      
       expand_query_selection_values = function(code){
         'Set selection.filter with all values.'
         stopifnot(code %in% .self$query$code)
