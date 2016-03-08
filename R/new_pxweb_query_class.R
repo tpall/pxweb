@@ -146,10 +146,55 @@ pxweb_query <-
       
       show = function(){
         'Print the pxwebapi object.'
-        cat("PXWEB query:\n")
+        .self$api$show()
+        cat("\nPXWEB query:\n")
         print(.self$get_query(TRUE))
         cat("\nQuery dimensions:\n")
         print(.self$get_query_dimensions())
+      },
+      
+      get_data = function(){
+        'Get data from the query.'
+
+        query_list <- .self$create_query_body_list()
+        big_query <- length(query_list) > 1
+
+        if(big_query) {
+          message("This is a big query. Downloading in ", length(query_list), " batches:\n")
+          prgs_bar <- msg_progress_bar(length(query_list))
+        }
+        
+        result_list <- list()
+        for(q in seq_along(query_list)){
+          length(query_list)
+          tmp_result <- .self$get_data_batch(query_list[[q]])
+          if(big_query) prgs_bar$increment()
+          if(q==1){
+            result <- tmp_result
+          } else {
+            result$data <- rbind(result$data, tmp_result$data)
+            result$comments <- c(result$comments, tmp_result$comments)
+          }
+        }
+        result
+      },
+      
+      get_data_batch = function(query_body){
+        'Get a batch of data from a pxweb api.'
+        
+        .self$api$add_call_to_timer()
+        response <- try(httr::POST(
+          url=.self$api$url,
+          body = query_body,
+          httr::content_type_json()), silent=TRUE)
+        
+        if (class(response)=="try-error") stop(paste0("No internet connection to ",.self$url), call.=FALSE)
+        
+        httr::stop_for_status(response)
+        
+        .self$clean_and_parse_json_data(json_data = suppressWarnings(httr::content(response)))
+        
+      },
       
       create_query_body_list = function(){
         'Split up a query into batches.'
@@ -170,6 +215,20 @@ pxweb_query <-
           .self$set_query_selection_values(code = names(split_variable), selection_values)
           return(q_list)
         }
+      },
+      
+      clean_and_parse_json_data = function(json_data){
+        
+        df <- data.frame(matrix(unlist(json_data$data), ncol=length(json_data$columns), byrow = TRUE), stringsAsFactors = FALSE)
+        for(j in seq_along(json_data$columns)){
+          if(json_data$columns[[j]]$type == "c") df[,j] <- as.numeric(df[,j])
+        }
+        colnames(df) <- unlist(lapply(json_data$columns, FUN = function(X) X$code))
+        res <- list(data=df,
+                    metadata=json_data$columns,
+                    comments=json_data$comments)
+        
+        res
       },
       
       set_query_selection_values = function(code, values){
