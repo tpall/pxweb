@@ -154,11 +154,8 @@ pxweb_query <-
       expand_query_selection_values = function(code){
         'Set selection.filter with all values.'
         stopifnot(code %in% .self$query$code)
-        print(code)
         index <- which(.self$query$code %in% code)
-        print(index)
         if(.self$query$selection$filter[[index]] == "all"){
-          print(.self$api$meta_data$variables[[index]]$values)
           .self$query$selection$values[[index]] <- unlist(.self$api$meta_data$variables[[index]]$values)
           .self$query$selection$filter[[index]] <- "item"
         }
