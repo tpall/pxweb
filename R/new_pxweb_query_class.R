@@ -150,6 +150,28 @@ pxweb_query <-
         print(.self$get_query(TRUE))
         cat("\nQuery dimensions:\n")
         print(.self$get_query_dimensions())
+      
+      create_query_body_list = function(){
+        'Split up a query into batches.'
+        if(prod(.self$query_dimensions) < .self$api$api_limits$max_values){
+          return(list(.self$get_query()))
+        } else {
+          split_variable <- which.max(.self$query_dimensions)
+          batch_size <- floor(.self$api$api_limits$max_values / prod(.self$query_dimensions[-split_variable]))
+          if(batch_size == 0) stop("Too large query! This should not happen, please file a bug report at github with the api call.", call.=FALSE)
+          .self$expand_query_selection_values(code = names(split_variable))
+          selection_values <- .self$get_query_selection_values(code = names(split_variable))
+          q_list <- list()
+          for(batch in 1:ceiling(.self$query_dimensions[split_variable] / batch_size)){
+            .self$set_query_selection_values(code = names(split_variable), 
+                                             values = selection_values[(batch_size * (batch - 1) + 1):min((batch_size * batch), length(selection_values))])
+            q_list[[batch]] <- .self$get_query()
+          }
+          .self$set_query_selection_values(code = names(split_variable), selection_values)
+          return(q_list)
+        }
+      },
+      
       set_query_selection_values = function(code, values){
         'Set selection.filter values.'
         stopifnot(code %in% .self$query$code,
