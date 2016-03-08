@@ -1,8 +1,11 @@
+if(!exists("context")) library(testthat)
+
 context("new_pxwebapi_query_class.R")
 
 test_that(desc="pxwebapi_query_class examples work",{  
 
-  pxwebapi_obj <- pxwebapi$new("http://api.scb.se/OV0104/v1/doris/sv/ssd/PR/PR0101/PR0101E/Basbeloppet")
+  api_url <- "http://api.scb.se/OV0104/v1/doris/sv/ssd/PR/PR0101/PR0101E/Basbeloppet"
+  pxwebapi_obj <- pxwebapi$new(api_url)
 
   json_query <-
     "{
@@ -38,17 +41,17 @@ test_that(desc="pxwebapi_query_class examples work",{
 
   expect_that({
     test_query <- 
-      pxweb_query$new(query = json_query, pxwebapi_obj)
+      pxweb_query$new(query = json_query, api = pxwebapi_obj)
   }, not(throws_error()))
 
   expect_that({
     test_query <- 
-      pxweb_query$new(list_query, pxwebapi_obj)
+      pxweb_query$new(query = list_query, api = pxwebapi_obj)
   }, not(throws_error()))
   
   expect_that({
     test_query <- 
-      pxweb_query$new(file_query, pxwebapi_obj)
+      pxweb_query$new(query = file_query, api = api_url)
   }, not(throws_error()))
   
 })
@@ -57,12 +60,12 @@ test_that(desc="pxwebapi_class input tests",{
   
   expect_that({
     test_query <- 
-      pxweb_query$new(1, pxwebapi_obj)
+      pxweb_query$new(query = 1, api = api_url)
   }, throws_error())
   
   expect_that({
     test_query <- 
-      pxweb_query$new(list_query, "url")
+      pxweb_query$new(query = list_query, api = "url")
   }, throws_error())
   
 })
@@ -104,7 +107,7 @@ test_that(desc="Bug in order of dims (#84 at github)",{
   
   expect_that({
     test_query <- 
-      pxweb_query$new(query, pxwebapi_obj)
+      pxweb_query$new(query = query, api = pxwebapi_obj)
   }, not(throws_error()))
   
 })
