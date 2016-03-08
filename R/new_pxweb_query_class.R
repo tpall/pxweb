@@ -6,23 +6,36 @@
 #'   http://www.scb.se/Grupp/OmSCB/API/API-description.pdf
 #' 
 #' @examples
-#'   
-#'   
+#'   example_url <- "http://api.scb.se/OV0104/v1/doris/sv/ssd/BE/BE0101/BE0101A/BefolkningNy"
+#'   example_query <- list(Region = c('*'), Civilstand = c('*'), Alder = c('*'), Kon = c('*'), ContentsCode = c('*'), Tid = as.character(1970:1971))
+#'   pxweb_q_url <- pxweb_query$new(api = example_url, query = example_query)
+#'   example_api <- pxwebapi$new(example_url)
+#'   pxweb_q_api <- pxweb_query$new(api = example_api, query = example_query)
+#' 
 #' @export pxweb_query
-
 pxweb_query <- 
   setRefClass(
     Class = "pxweb_query", 
     fields = list(query = "data.frame",
-                  query_dimensions = "numeric"),
+                  query_dimensions = "numeric",
+                  api = "pxwebapi"),
     
     methods = list(
 
-      initialize = function(query, pxwebapi_obj){
+      initialize = function(api, query){
         'Create a new pxwebapi_query'
-        .self$parse_query(query)        
-        .self$check_pxweb_query(pxwebapi_obj)
-        .self$set_query_dimensions(pxwebapi_obj)
+        # API can be a character/url or a pxwebapi object
+        .self$parse_query(query)
+        if(class(api) == "character" & length(api) == 1){
+          .self$api <- pxwebapi$new(api_url = api)
+        } else if(class(api) == "pxwebapi") {
+          .self$api <- api
+        } else {
+          stop("api is not a valid url or pxwebapi object")
+        }
+        .self$check_pxweb_query()
+        .self$set_query_dimensions()
+
       },
 
       parse_query = function(query){
