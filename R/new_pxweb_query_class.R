@@ -1,17 +1,25 @@
 #' A Reference Class to represent an pxweb api query
 #' 
-#' @field query
+#' @field query Can be one of three different types of queries
+#' - A list with named list with variable codes as names and a vector of values (or * for all)
+#' - A json object query (same as produced at Statistics Swedens homepage)
+#' - A txt file with a json query
+#' @field api A url or a pxwebapi object
 #' 
 #' @references 
 #'   http://www.scb.se/Grupp/OmSCB/API/API-description.pdf
 #' 
 #' @examples
 #'   example_url <- "http://api.scb.se/OV0104/v1/doris/sv/ssd/BE/BE0101/BE0101A/BefolkningNy"
+#'   example_query <- list(Region = c('*'), Civilstand = c('*'), Alder = c('*'), Kon = c('*'), ContentsCode = c('*'), Tid = '*')
 #'   example_query <- list(Region = c('*'), Civilstand = c('*'), Alder = c('*'), Kon = c('*'), ContentsCode = c('*'), Tid = as.character(1970:1971))
 #'   pxweb_q_url <- pxweb_query$new(api = example_url, query = example_query)
+#'   
+#'   example_url <- "http://api.scb.se/OV0104/v1/doris/sv/ssd/PR/PR0101/PR0101E/Basbeloppet"
 #'   example_api <- pxwebapi$new(example_url)
+#'   example_query <- list(ContentsCode = c('PR0101A1'),Tid = c('*'))
 #'   pxweb_q_api <- pxweb_query$new(api = example_api, query = example_query)
-#' 
+#'   pxweb_q_api$get_data()
 #' @export pxweb_query
 pxweb_query <- 
   setRefClass(
@@ -78,10 +86,9 @@ pxweb_query <-
         stop("Not a correct pxweb query.")
       },
       
-      check_pxweb_query = function(pxwebapi_obj){
-        if(!inherits(pxwebapi_obj, "pxwebapi")) stop("Not a pxweb api object!")
+      check_pxweb_query = function(){
         
-        dim_names_api <- unlist(lapply(X = pxwebapi_obj$get_metadata()$variables, FUN=function(X) X$code))
+        dim_names_api <- unlist(lapply(X = .self$api$get_metadata()$variables, FUN=function(X) X$code))
         
         # ContentCode is missing (common with json queries)
         if(length(dim_names_api) - 1 == length(.self$query$code) && 
@@ -123,7 +130,7 @@ pxweb_query <-
         jsonlite::toJSON(list(query=.self$query, response=list(format=jsonlite::unbox("json"))), pretty = pretty)
       },
       
-      set_query_dimensions = function(pxwebapi_obj){
+      set_query_dimensions = function(){
         'Get the size of the query.'
         q_dims <- integer(length(.self$query$code))
         names(q_dims) <- .self$query$code
@@ -132,8 +139,8 @@ pxweb_query <-
           if(.self$query$selection$filter[i] == "item"){
             q_dims[i] <- length(.self$query$selection$values[[i]])
           } else if(.self$query$selection$filter[i] == "all") {
-            pxwebapi_obj$meta_data
-            q_dims[i] <- length(pxwebapi_obj$meta_data$variables[[i]]$values)
+            .self$api$meta_data
+            q_dims[i] <- length(.self$api$meta_data$variables[[i]]$values)
           }
         }
         .self$query_dimensions <- q_dims
@@ -264,8 +271,9 @@ pxweb_query <-
           .self$set_query_selection_values(code, unlist(.self$api$meta_data$variables[[index]]$values)) 
         }
       }
+      
     )
-)        
+)
 
 
 
