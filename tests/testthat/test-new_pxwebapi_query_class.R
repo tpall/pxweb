@@ -112,3 +112,17 @@ test_that(desc="Bug in order of dims (#84 at github)",{
   
 })
 
+test_that(desc="pxwebapi_query change query",{  
+  
+  # Test expand_query_selection_values method
+  example_url <- "http://api.scb.se/OV0104/v1/doris/sv/ssd/PR/PR0101/PR0101E/Basbeloppet"
+  example_query <- list(ContentsCode = c('PR0101A1'),Tid = c('*'))
+  pxweb_q_api <- pxweb_query$new(api = example_url, query = example_query)
+
+  expect_true(length(pxweb_q_api$query$selection$values[[2]]) == 1)
+
+  pxweb_q_api$expand_query_selection_values(code = "Tid")
+  
+  expect_true(length(pxweb_q_api$query$selection$values[[2]]) == 57)
+  
+})
