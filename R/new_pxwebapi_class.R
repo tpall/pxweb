@@ -15,6 +15,7 @@
 #'   http://www.scb.se/Grupp/OmSCB/API/API-description.pdf
 #' 
 #' @examples
+#'   pxwebapi$new()
 #'   pxwebapi$new(api_url = "http://api.scb.se/OV0104/v1/doris/sv/")
 #'   pxwebapi$new(api_url = "http://api.scb.se/OV0104/v1/doris/sv/ssd/")
 #'   pxwebapi$new(api_url = "http://api.scb.se/OV0104/v1/doris/sv/ssd/PR/PR0101/PR0101E/Basbeloppet")
@@ -89,69 +90,6 @@ pxwebapi <-
         .self$meta_data
       },
       
-      get_data = function(query){
-        'Get data from content.'
-        if(!inherits(query, "pxweb_query")) stop("Not a pxweb query!")
-
-        query_list <- .self$create_query_batches(query)
-        big_query <- length(query_list) > 1
-        if(big_query) {
-          message("This is a big query. Downloading in ", length(query_list), " batches:\n")
-          prgs_bar <- msg_progress_bar(length(query_list))
-        }
-        
-        result_list <- list()
-        for(q in seq_along(query_list)){
-          tmp_result <- .self$get_data_batch(query_list[q])
-          if(big_query) prgs_bar$increment()
-          if(q==1){
-            result <- tmp_result
-          } else {
-            result$data <- rbind(result$data, tmp_result$data)
-            result$comments <- c(result$comments, tmp_result$comments)
-          }
-        }
-        result
-      },
-      
-      get_data_batch = function(query){
-        'Get a batch of data from a pxweb api.'
-        
-        .self$add_call_to_timer()
-        response <- try(httr::POST(
-          url=.self$url,
-          body = query$get_query(FALSE),
-          httr::content_type_json()), silent=TRUE)
-        
-        if (class(response)=="try-error") stop(paste0("No internet connection to ",.self$url), call.=FALSE)
-
-        httr::stop_for_status(response)
-
-        .self$clean_and_parse_json_data(json_data = suppressWarnings(httr::content(response)))
-
-      },
-      
-      create_query_batches = function(query){
-        'Split up a query into batches.'
-        
-        query
-      },
-      
-      clean_and_parse_json_data = function(json_data){
-        
-        df <- data.frame(matrix(unlist(json_data$data), ncol=length(json_data$columns), byrow = TRUE), stringsAsFactors = FALSE)
-        for(j in seq_along(json_data$columns)){
-          if(json_data$columns[[j]]$type == "c") df[,j] <- as.numeric(df[,j])
-        }
-        colnames(df) <- unlist(lapply(json_data$columns, FUN = function(X) X$code))
-        res <- list(data=df,
-                    metadata=json_data$columns,
-                    comments=json_data$comments)
-
-        res
-      },
-        
-
       add_call_to_timer = function(calls = 1){
         'Add a call to the api to the api timer.'
         if(!file.exists(.self$api_timer_file)){ # File doesn't exist
@@ -180,15 +118,18 @@ pxwebapi <-
       },
       
 
-      initialize = function(api_url){
+      initialize = function(api_url = ""){
         'Create a new pxwebapi object.'
+        stopifnot(length(api_url) == 1)
         
-        .self$url <- api_url
-        .self$api_name <- make.names(strsplit(api_url, split = "/")[[1]][3])
-        .self$set_api_timer_file()
-        .self$fetch_api_config()
-        .self$fetch_metadata()
-        .self$set_url_type()
+        if(api_url != ""){
+          .self$url <- api_url
+          .self$api_name <- make.names(strsplit(api_url, split = "/")[[1]][3])
+          .self$set_api_timer_file()
+          .self$fetch_api_config()
+          .self$fetch_metadata()
+          .self$set_url_type()
+        }
         
       },
       
@@ -200,8 +141,8 @@ pxwebapi <-
         cat("Api timer file:", .self$api_timer_file, "\n")
         cat("Limits:\n")
         print(.self$api_limits)
-        cat("Meta_data:")
-        print(.self$meta_data)
+        cat("Meta_data (size):")
+        print(str(.self$meta_data))
       }
     )
 )        
