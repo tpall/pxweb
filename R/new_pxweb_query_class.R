@@ -150,9 +150,26 @@ pxweb_query <-
         print(.self$get_query(TRUE))
         cat("\nQuery dimensions:\n")
         print(.self$get_query_dimensions())
+      set_query_selection_values = function(code, values){
+        'Set selection.filter values.'
+        stopifnot(code %in% .self$query$code,
+                  is.vector(values))
+        index <- which(.self$query$code %in% code)
+        stopifnot(all(values %in% unlist(.self$api$meta_data$variables[[index]]$values)))
+        .self$query$selection$values[[index]] <- values
+        if(length(values) == 1 && values == "*"){
+          .self$query$selection$filter[[index]] <- "all"
+        } else if (length(values) == 1 && is.numeric(values)){
+          .self$query$selection$filter[[index]] <- "top"
+        } else if (length(values) > 1 && is.character(values)) {
+          .self$query$selection$filter[[index]] <- "item"          
+        } else {
+          stop(paste0("Incorrect values: ", values))
+        }
+      },
       
       get_query_selection_values = function(code){
-        'Set selection.filter with all values.'
+        'Get selection.filter values.'
         stopifnot(code %in% .self$query$code)
         index <- which(.self$query$code %in% code)
         .self$query$selection$values[[index]]
@@ -163,8 +180,7 @@ pxweb_query <-
         stopifnot(code %in% .self$query$code)
         index <- which(.self$query$code %in% code)
         if(.self$query$selection$filter[[index]] == "all"){
-          .self$query$selection$values[[index]] <- unlist(.self$api$meta_data$variables[[index]]$values)
-          .self$query$selection$filter[[index]] <- "item"
+          .self$set_query_selection_values(code, unlist(.self$api$meta_data$variables[[index]]$values)) 
         }
       }
     )
