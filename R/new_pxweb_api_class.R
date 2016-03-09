@@ -110,10 +110,8 @@ pxwebapi <-
       
       set_api_timer_file = function(){
         'Set file to use for the api timer.'
-
-        # .self$api_timer_file <- paste0(system.file("extdata/", package = "pxweb"), "api_timer.rdata")       
         pxweb_temp_dir <- paste0(tempdir(), "/pxweb/")
-        if(!dir.exists(pxweb_temp_dir)) dir.create(paste0(tempdir(), "/pxweb/"))
+        dir.create(paste0(tempdir(), "/pxweb/"), showWarnings = FALSE)
         .self$api_timer_file <- paste0(tempdir(), "/pxweb/api_timer.rdata")
       },
       
