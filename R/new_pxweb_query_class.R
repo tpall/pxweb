@@ -176,14 +176,25 @@ pxweb_query <-
           length(query_list)
           tmp_result <- .self$get_data_batch(query_list[[q]])
           if(big_query) prgs_bar$increment()
-          if(q==1){
+          if(q == 1){
             result <- tmp_result
           } else {
             result$data <- rbind(result$data, tmp_result$data)
             result$comments <- c(result$comments, tmp_result$comments)
           }
         }
-        result
+        
+        # Add meta data to data.frame
+        result_data <- result$data
+        attr(result_data, "variable_description") <- 
+          data.frame(variable = unlist(lapply(result$metadata, FUN=function(X) X$code)),
+                     description = unlist(lapply(result$metadata, FUN=function(X) X$text)), stringsAsFactors = FALSE)
+        attr(result_data, "comments") <- c(unlist(lapply(result$metadata, FUN=function(X) X$comment)),
+                                           unlist(lapply(result$comments, FUN=function(X) paste0(X$variable, " ", X$value, ": ", X$comment))))
+        attr(result_data, "data_source") <- pxweb_q_api$api$url
+        attr(result_data, "time") <- Sys.time()
+        
+        result_data
       },
       
       get_data_batch = function(query_body){

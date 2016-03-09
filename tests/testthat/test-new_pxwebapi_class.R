@@ -1,5 +1,3 @@
-# Test suite for utils functions
-
 context("new_pxwebapi_class.R")
 
 test_that(desc="pxwebapi_class examples work",{  

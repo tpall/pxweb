@@ -125,7 +125,7 @@ test_that(desc="pxwebapi_query examples",{
       pxweb_q_api$get_data()
   }, not(throws_error()))
   
-  expect_is(test_data, "list")
+  expect_is(test_data, "data.frame")
   
   # Big query
   example_url <- "http://api.scb.se/OV0104/v1/doris/sv/ssd/BE/BE0101/BE0101A/BefolkningNy"
@@ -137,7 +137,7 @@ test_that(desc="pxwebapi_query examples",{
       pxweb_q_api$get_data()
   }, not(throws_error()))
   
-  expect_is(test_data, "list")
+  expect_is(test_data, "data.frame")
   
 })
 
@@ -157,5 +157,6 @@ test_that(desc="pxwebapi_query change query",{
   
   expect_true(length(pxweb_q_api$query$selection$values[[2]]) == 57)
   expect_true(length(pxweb_q_api$get_query_selection_values("Tid")) == 57)
+  
 })
 
