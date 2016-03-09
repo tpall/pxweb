@@ -11,24 +11,53 @@ A Reference Class to represent an pxweb api query
 \section{Fields}{
 
 \describe{
-\item{\code{query}}{}
+\item{\code{query}}{Can be one of three different types of queries
+- A list with named list with variable codes as names and a vector of values (or * for all)
+- A json object query (same as produced at Statistics Swedens homepage)
+- A txt file with a json query}
+
+\item{\code{api}}{A url or a pxwebapi object}
 }}
 \section{Methods}{
 
 \describe{
-\item{\code{get_query()}}{Get data from content.}
+\item{\code{create_query_body_list()}}{Split up a query into batches.}
 
-\item{\code{initialize(query, pxwebapi)}}{Create a new pxwebapi_query}
+\item{\code{expand_query_selection_values(code)}}{Set selection.filter with all values.}
+
+\item{\code{get_data()}}{Get data from the query.}
+
+\item{\code{get_data_batch(query_body)}}{Get a batch of data from a pxweb api.}
+
+\item{\code{get_query(pretty = FALSE)}}{Get query in json format.}
+
+\item{\code{get_query_dimensions()}}{Get the size of the query.}
+
+\item{\code{get_query_selection_values(code)}}{Get selection.filter values.}
+
+\item{\code{initialize(api, query)}}{Create a new pxwebapi_query}
 
 \item{\code{parse_query(query)}}{Parse pxweb query}
 
 \item{\code{parse_query_json(query)}}{Parse json pxweb query}
 
 \item{\code{parse_query_list(query)}}{Parse list pxweb query}
+
+\item{\code{set_query_dimensions()}}{Get the size of the query.}
+
+\item{\code{set_query_selection_values(code, values)}}{Set selection.filter values.}
 }}
 \examples{
+  example_url <- "http://api.scb.se/OV0104/v1/doris/sv/ssd/BE/BE0101/BE0101A/BefolkningNy"
+  example_query <- list(Region = c('*'), Civilstand = c('*'), Alder = c('*'), Kon = c('*'), ContentsCode = c('*'), Tid = '*')
+  example_query <- list(Region = c('*'), Civilstand = c('*'), Alder = c('*'), Kon = c('*'), ContentsCode = c('*'), Tid = as.character(1970:1971))
+  pxweb_q_url <- pxweb_query$new(api = example_url, query = example_query)
   
-  
+  example_url <- "http://api.scb.se/OV0104/v1/doris/sv/ssd/PR/PR0101/PR0101E/Basbeloppet"
+  example_api <- pxwebapi$new(example_url)
+  example_query <- list(ContentsCode = c('PR0101A1'),Tid = c('*'))
+  pxweb_q_api <- pxweb_query$new(api = example_api, query = example_query)
+  pxweb_q_api$get_data()
 }
 \references{
 http://www.scb.se/Grupp/OmSCB/API/API-description.pdf

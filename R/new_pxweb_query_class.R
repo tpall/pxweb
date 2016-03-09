@@ -184,16 +184,34 @@ pxweb_query <-
           }
         }
         
-        # Add meta data to data.frame
+        .self$clean_final_data(result)
+      },
+      
+      clean_final_data = function(result){
+        # Add attributes
         result_data <- result$data
         attr(result_data, "variable_description") <- 
           data.frame(variable = unlist(lapply(result$metadata, FUN=function(X) X$code)),
                      description = unlist(lapply(result$metadata, FUN=function(X) X$text)), stringsAsFactors = FALSE)
+
+        meta_data <- .self$api$get_metadata()
+        variable_value_labels <- list()
+        for(i in seq_along(meta_data$variables)){
+          code <- meta_data$variables[[i]]$code
+          if(code %in% colnames(result_data)){
+          result_data[,code] <- factor(result_data[,code], 
+                                       levels = unlist(meta_data$variables[[i]]$values), 
+                                       labels = unlist(meta_data$variables[[i]]$valueTexts))
+          variable_value_labels[[code]] <- 
+            data.frame(values=unlist(meta_data$variables[[i]]$values), 
+                       valueTexts=unlist(meta_data$variables[[i]]$valueTexts), stringsAsFactors = FALSE)
+          }
+        }
+        attr(result_data, "variable_value_labels") <- variable_value_labels
         attr(result_data, "comments") <- c(unlist(lapply(result$metadata, FUN=function(X) X$comment)),
                                            unlist(lapply(result$comments, FUN=function(X) paste0(X$variable, " ", X$value, ": ", X$comment))))
         attr(result_data, "data_source") <- pxweb_q_api$api$url
         attr(result_data, "time") <- Sys.time()
-        
         result_data
       },
       
