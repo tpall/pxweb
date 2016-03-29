@@ -203,14 +203,14 @@ pxweb_query <-
                                        levels = unlist(meta_data$variables[[i]]$values), 
                                        labels = unlist(meta_data$variables[[i]]$valueTexts))
           variable_value_labels[[code]] <- 
-            data.frame(values=unlist(meta_data$variables[[i]]$values), 
-                       valueTexts=unlist(meta_data$variables[[i]]$valueTexts), stringsAsFactors = FALSE)
+            data.frame(value=unlist(meta_data$variables[[i]]$values), 
+                       label=unlist(meta_data$variables[[i]]$valueTexts), stringsAsFactors = FALSE)
           }
         }
         attr(result_data, "variable_value_labels") <- variable_value_labels
         attr(result_data, "comments") <- c(unlist(lapply(result$metadata, FUN=function(X) X$comment)),
                                            unlist(lapply(result$comments, FUN=function(X) paste0(X$variable, " ", X$value, ": ", X$comment))))
-        attr(result_data, "data_source") <- pxweb_q_api$api$url
+        attr(result_data, "data_source") <- .self$api$url
         attr(result_data, "time") <- Sys.time()
         result_data
       },

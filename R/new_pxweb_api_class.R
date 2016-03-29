@@ -22,7 +22,6 @@
 #'   try(pxwebapi$new(api_url = "http://www.dn.se"))
 #'   
 #' @export pxwebapi
-
 pxwebapi <- 
   setRefClass(
     Class = "pxwebapi", 
