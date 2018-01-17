@@ -13,19 +13,15 @@ sandbox/*.R
 sandbox
 
 README.md
-
 # Git related
 ./.git*
-
 # Travis scripts
 .travis.yml
-
 # Extra Vignette materials
 vignettes/pxweb.md
-
 # Misc
 ./.*~
 ./*~
-
 ^.*\.Rproj$
 ^\.Rproj\.user$
+^docs$
