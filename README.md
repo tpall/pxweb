@@ -15,7 +15,7 @@ many other countries. Many API services are still in their early
 stages, and data quality is sometimes compromised. Issue reports are
 welcome.
 
-For installation and usage, check the [tutorial page](docs/articles/pxweb.md).  
+For installation and usage, check the [tutorial page](https://tpall.github.io/pxweb/articles/pxweb.html).  
 
 Authors: [Måns Magnusson](https://github.com/MansMeg/), [Love Hansson](https://github.com/LCHansson/), [Leo Lahti](https://github.com/antagomir). Part of [rOpenGov](http://ropengov.github.io/).
   
